@@ -1,31 +1,40 @@
 package babymonitor.app;
 
 import android.app.KeyguardManager;
-import android.content.Context;
+import android.content.*;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.ActionBarActivity;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.Button;
 import android.widget.TextView;
 import android.os.Handler;
 import android.os.PowerManager;
 import android.util.Log;
 import android.widget.Toast;
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.GoogleApiAvailability;
 
 public class MyActivity extends ActionBarActivity implements SensorEventListener {
+
+    private static final float SHAKE_THRESHOLD = 1.04f;
+    private static final int SHAKE_WAIT_TIME_MS = 250;
+    private static final int PLAY_SERVICES_RESOLUTION_REQUEST = 9000;
+    private static final String TAG = "MyActivity";
 
     private  int counter = 0;
     private boolean crying = false;
     private SensorManager sensorManager;
     private Sensor accelerometer;
 
-    private static final float SHAKE_THRESHOLD = 1.04f;
-    private static final int SHAKE_WAIT_TIME_MS = 250;
     private long movingTime = 10000;
     private int movingCounter =0;
 
@@ -36,14 +45,15 @@ public class MyActivity extends ActionBarActivity implements SensorEventListener
     private float deltaZ = 0;
 
     private TextView currentX, currentY, currentZ;
+    private TextView mInformationTextView;
 
-    /* Sound part */
-    private PowerManager.WakeLock wl;
     private Handler handler;
     private SoundMeter mSensor;
     private PowerManager.WakeLock fullWakeLock;
     private PowerManager.WakeLock partialWakeLock;
-     /* Sound part END */
+
+    private BroadcastReceiver mRegistrationBroadcastReceiver;
+    private Button sendButton;
 
 
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -82,7 +92,39 @@ public class MyActivity extends ActionBarActivity implements SensorEventListener
         initializeViews();
         createWakeLocks();
 
+        mInformationTextView = (TextView) findViewById(R.id.informationTextView);
+        sendButton = (Button) findViewById(R.id.sendButton);
 
+        sendButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                SendRequest.send("/topics/topic", "mesaj", getApplicationContext());
+            }
+        });
+
+
+
+
+        mRegistrationBroadcastReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                SharedPreferences sharedPreferences =
+                        PreferenceManager.getDefaultSharedPreferences(context);
+                boolean sentToken = sharedPreferences
+                        .getBoolean(QuickstartPreferences.SENT_TOKEN_TO_SERVER, false);
+                if (sentToken) {
+                    mInformationTextView.setText(getString(R.string.gcm_send_message));
+                } else {
+                    mInformationTextView.setText(getString(R.string.token_error_message));
+                }
+            }
+        };
+
+        if (checkPlayServices()) {
+            // Start IntentService to register this application with GCM.
+            Intent intent = new Intent(this, RegistrationIntentService.class);
+            startService(intent);
+        }
     }
 
     private void startSoundRecorder() {
@@ -203,12 +245,15 @@ public class MyActivity extends ActionBarActivity implements SensorEventListener
         if(partialWakeLock.isHeld()){
             partialWakeLock.release();
         }
+        LocalBroadcastManager.getInstance(this).registerReceiver(mRegistrationBroadcastReceiver,
+                new IntentFilter(QuickstartPreferences.REGISTRATION_COMPLETE));
+
     }
 
-    //onPause() unregister the accelerometer for stop listening the events
     protected void onPause() {
-        super.onPause();
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(mRegistrationBroadcastReceiver);
         partialWakeLock.acquire();
+        super.onPause();
     }
 
     @Override
@@ -307,4 +352,26 @@ public class MyActivity extends ActionBarActivity implements SensorEventListener
         KeyguardManager.KeyguardLock keyguardLock = keyguardManager.newKeyguardLock("TAG");
         keyguardLock.disableKeyguard();
     }
+
+    /**
+     * Check the device to make sure it has the Google Play Services APK. If
+     * it doesn't, display a dialog that allows users to download the APK from
+     * the Google Play Store or enable it in the device's system settings.
+     */
+    private boolean checkPlayServices() {
+        GoogleApiAvailability apiAvailability = GoogleApiAvailability.getInstance();
+        int resultCode = apiAvailability.isGooglePlayServicesAvailable(this);
+        if (resultCode != ConnectionResult.SUCCESS) {
+            if (apiAvailability.isUserResolvableError(resultCode)) {
+                apiAvailability.getErrorDialog(this, resultCode, PLAY_SERVICES_RESOLUTION_REQUEST)
+                        .show();
+            } else {
+                Log.i(TAG, "This device is not supported.");
+                finish();
+            }
+            return false;
+        }
+        return true;
+    }
 }
+
