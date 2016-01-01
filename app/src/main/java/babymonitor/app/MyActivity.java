@@ -1,6 +1,5 @@
 package babymonitor.app;
 
-import android.app.Activity;
 import android.app.KeyguardManager;
 import android.content.Context;
 import android.hardware.Sensor;
