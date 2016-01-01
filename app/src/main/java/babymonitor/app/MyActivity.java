@@ -8,6 +8,7 @@ import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.Bundle;
+import android.support.v7.app.ActionBarActivity;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -17,7 +18,7 @@ import android.os.PowerManager;
 import android.util.Log;
 import android.widget.Toast;
 
-public class MyActivity extends Activity implements SensorEventListener {
+public class MyActivity extends ActionBarActivity implements SensorEventListener {
 
     private  int counter = 0;
     private boolean crying = false;
@@ -48,7 +49,7 @@ public class MyActivity extends Activity implements SensorEventListener {
 
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.menu, menu);
+        inflater.inflate(R.menu.activity_main, menu);
         return true;
     }
 
@@ -78,7 +79,7 @@ public class MyActivity extends Activity implements SensorEventListener {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.main);
+        setContentView(R.layout.activity_main);
         initializeViews();
         createWakeLocks();
 

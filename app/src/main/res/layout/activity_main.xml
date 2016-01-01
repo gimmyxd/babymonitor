@@ -2,7 +2,7 @@
                 xmlns:tools="http://schemas.android.com/tools"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                tools:context=".MainActivity" >
+                tools:context=".ActivityMain" >
 
     <LinearLayout
             android:layout_width="match_parent"
@@ -100,15 +100,5 @@
             android:text="Volume Level: n/a"
             android:textAppearance="?android:attr/textAppearanceMedium"
             />
-
-    <TextView
-            android:id="@+id/volumeBars"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_below="@+id/volumeLevel"
-            android:layout_centerHorizontal="true"
-            android:text="Large Text"
-            android:textAppearance="?android:attr/textAppearanceLarge"
-            android:textSize="50dp" />
 
 </RelativeLayout>
