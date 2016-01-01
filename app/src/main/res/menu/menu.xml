@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item android:title="@string/titleRecordingStart" android:id="@+id/itemRecordingStart"
+          android:icon="@android:drawable/ic_media_play"></item>
+    <item android:title="@string/titleRecordingStop" android:id="@+id/itemRecordingStop"
+          android:icon="@android:drawable/ic_media_pause"/>
+</menu>
