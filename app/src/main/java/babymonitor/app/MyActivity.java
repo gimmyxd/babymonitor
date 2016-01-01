@@ -10,6 +10,7 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.ActionBarActivity;
+import android.text.TextUtils;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -29,7 +30,9 @@ public class MyActivity extends ActionBarActivity implements SensorEventListener
     private static final int SHAKE_WAIT_TIME_MS = 250;
     private static final int PLAY_SERVICES_RESOLUTION_REQUEST = 9000;
     private static final String TAG = "MyActivity";
+    private BabyMonitorAppication babyApp ;
 
+    private SharedPreferences prefs ;
     private  int counter = 0;
     private boolean crying = false;
     private SensorManager sensorManager;
@@ -37,6 +40,9 @@ public class MyActivity extends ActionBarActivity implements SensorEventListener
 
     private long movingTime = 10000;
     private int movingCounter =0;
+    private String topic ="";
+    private boolean moving = false;
+
 
     private long mShakeTime = 0;
 
@@ -79,7 +85,15 @@ public class MyActivity extends ActionBarActivity implements SensorEventListener
                 stopAccelerometer();
                 Toast.makeText(getBaseContext(), "Stop Recording", Toast.LENGTH_SHORT).show();
                 break;
+            case R.id.itemSubscribingStart:
+                RegistrationIntentService.running ="yes";
+                Intent msgIntent = new Intent(this, RegistrationIntentService.class);
+                startService(msgIntent);
+                break;
 
+            case R.id.itemPrefs:
+                startActivity(new Intent(this, TopicActivity.class));
+                break;
         }
 
         return true;
@@ -98,7 +112,16 @@ public class MyActivity extends ActionBarActivity implements SensorEventListener
         sendButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                SendRequest.send("/topics/topic", "mesaj", getApplicationContext());
+                try {
+                    BabyMonitorAppication baby = ((BabyMonitorAppication)getApplication());
+                    topic = baby.getTopic();
+
+                } catch (Exception e) {
+                    Log.e(TAG, "Failed to connect to twitter service", e);
+
+                }
+                if (!TextUtils.isEmpty(topic))
+                SendRequest.send("/topics/"+topic, getString(R.string.testMessage), getApplicationContext());
             }
         });
 
@@ -169,7 +192,7 @@ public class MyActivity extends ActionBarActivity implements SensorEventListener
                                     counter = 0;
                                     wakeDevice();
                                     fullWakeLock.release();
-                                    Toast.makeText(getBaseContext(), "Crying!", Toast.LENGTH_LONG).show();
+                                    SendRequest.send("/topics/" + topic, getString(R.string.cryingMessage), getApplicationContext());
                                 }
                             }
 
@@ -182,7 +205,7 @@ public class MyActivity extends ActionBarActivity implements SensorEventListener
                                 if (counter == 10) {
                                     crying = false;
                                     counter = 0;
-                                    Toast.makeText(getBaseContext(), "Not Crying!", Toast.LENGTH_LONG).show();
+                                    SendRequest.send("/topics/" + topic, getString(R.string.stopCrying), getApplicationContext());;
                                 }
                             }
 
@@ -231,8 +254,6 @@ public class MyActivity extends ActionBarActivity implements SensorEventListener
     }
 
     public void initializeViews() {
-        currentX = (TextView) findViewById(R.id.currentX);
-        currentY = (TextView) findViewById(R.id.currentY);
         currentZ = (TextView) findViewById(R.id.currentZ);
     }
 
@@ -263,7 +284,6 @@ public class MyActivity extends ActionBarActivity implements SensorEventListener
 
     private void detectShake(SensorEvent event) {
         long now = System.currentTimeMillis();
-
         if((now - mShakeTime) > SHAKE_WAIT_TIME_MS) {
             if(movingTime > 0 )
                 movingTime = movingTime - SHAKE_WAIT_TIME_MS ;
@@ -281,15 +301,17 @@ public class MyActivity extends ActionBarActivity implements SensorEventListener
             // Alert if gForce exceeds threshold;
             if(gForce > SHAKE_THRESHOLD) {
                 movingCounter++;
-                if(movingCounter >= 5)
+                if(movingCounter >= 5 && moving == false)
                 {
-                    Toast.makeText(getBaseContext(), "It's moving!", Toast.LENGTH_SHORT).show();
+                    moving = true;
+                    SendRequest.send("/topics/" + topic, getString(R.string.movingMessage), getApplicationContext());
                 }
             }
-            else if (movingTime == 0){
+            else if (movingTime == 0 && moving == true){
+                moving = false;
                 movingCounter = 0 ;
                 movingTime = 10000;
-                Toast.makeText(getBaseContext(), "It's  NOT moving!", Toast.LENGTH_SHORT).show();
+                SendRequest.send("/topics/" + topic, getString(R.string.stopMoving), getApplicationContext());
             }
         }
     }
@@ -318,15 +340,11 @@ public class MyActivity extends ActionBarActivity implements SensorEventListener
     }
 
     public void displayCleanValues() {
-        currentX.setText("0.0");
-        currentY.setText("0.0");
-        currentZ.setText("0.0");
+            currentZ.setText("0.0");
     }
 
     // display the current x,y,z accelerometer values
     public void displayCurrentValues() {
-        currentX.setText(Float.toString(deltaX));
-        currentY.setText(Float.toString(deltaY ));
         currentZ.setText(Float.toString(movingCounter));
     }
 
