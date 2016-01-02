@@ -17,4 +17,9 @@
     <string name="movingMessage">Your baby is mooving.Go take care of him!</string>
     <string name="stopMoving">Your baby is chillin.</string>
     <string name="stopCrying">Your baby is quiet and peaceful.</string>
+    <string name="volume_level">Volume Level: n/a</string>
+    <string name="babyState">State: </string>
+    <string name="movesCount">Moves Count:</string>
+    <string name="notSleeping">awake</string>
+    <string name="sleeping">sleeping</string>
 </resources>

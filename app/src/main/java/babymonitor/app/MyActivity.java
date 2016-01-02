@@ -9,13 +9,11 @@ import android.hardware.SensorManager;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.content.LocalBroadcastManager;
-import android.support.v7.app.ActionBarActivity;
+import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.view.View;
-import android.widget.Button;
 import android.widget.TextView;
 import android.os.Handler;
 import android.os.PowerManager;
@@ -24,15 +22,12 @@ import android.widget.Toast;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
 
-public class MyActivity extends ActionBarActivity implements SensorEventListener {
+public class MyActivity extends AppCompatActivity implements SensorEventListener {
 
+    private static final String TAG = "MyActivity";
     private static final float SHAKE_THRESHOLD = 1.04f;
     private static final int SHAKE_WAIT_TIME_MS = 250;
     private static final int PLAY_SERVICES_RESOLUTION_REQUEST = 9000;
-    private static final String TAG = "MyActivity";
-    private BabyMonitorAppication babyApp ;
-
-    private SharedPreferences prefs ;
     private  int counter = 0;
     private boolean crying = false;
     private SensorManager sensorManager;
@@ -46,11 +41,7 @@ public class MyActivity extends ActionBarActivity implements SensorEventListener
 
     private long mShakeTime = 0;
 
-    private float deltaX = 0;
-    private float deltaY = 0;
-    private float deltaZ = 0;
-
-    private TextView currentX, currentY, currentZ;
+    private TextView movesCount;
     private TextView mInformationTextView;
 
     private Handler handler;
@@ -59,8 +50,6 @@ public class MyActivity extends ActionBarActivity implements SensorEventListener
     private PowerManager.WakeLock partialWakeLock;
 
     private BroadcastReceiver mRegistrationBroadcastReceiver;
-    private Button sendButton;
-
 
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
@@ -90,12 +79,13 @@ public class MyActivity extends ActionBarActivity implements SensorEventListener
                 Intent msgIntent = new Intent(this, RegistrationIntentService.class);
                 startService(msgIntent);
                 break;
-
+            case R.id.itemSendTestMessage:
+                sendTestMessage();
+                break;
             case R.id.itemPrefs:
                 startActivity(new Intent(this, TopicActivity.class));
                 break;
         }
-
         return true;
     }
 
@@ -105,28 +95,9 @@ public class MyActivity extends ActionBarActivity implements SensorEventListener
         setContentView(R.layout.activity_main);
         initializeViews();
         createWakeLocks();
+        cleanState();
 
         mInformationTextView = (TextView) findViewById(R.id.informationTextView);
-        sendButton = (Button) findViewById(R.id.sendButton);
-
-        sendButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                try {
-                    BabyMonitorAppication baby = ((BabyMonitorAppication)getApplication());
-                    topic = baby.getTopic();
-
-                } catch (Exception e) {
-                    Log.e(TAG, "Failed to connect to twitter service", e);
-
-                }
-                if (!TextUtils.isEmpty(topic))
-                SendRequest.send("/topics/"+topic, getString(R.string.testMessage), getApplicationContext());
-            }
-        });
-
-
-
 
         mRegistrationBroadcastReceiver = new BroadcastReceiver() {
             @Override
@@ -148,6 +119,19 @@ public class MyActivity extends ActionBarActivity implements SensorEventListener
             Intent intent = new Intent(this, RegistrationIntentService.class);
             startService(intent);
         }
+    }
+
+    private void sendTestMessage() {
+        try {
+            BabyMonitorAppication baby = ((BabyMonitorAppication)getApplication());
+            topic = baby.getTopic();
+
+        } catch (Exception e) {
+            Log.e(TAG, "Failed to connect", e);
+
+        }
+        if (!TextUtils.isEmpty(topic))
+            SendRequest.send("/topics/" + topic, getString(R.string.testMessage), getApplicationContext());
     }
 
     private void startSoundRecorder() {
@@ -181,34 +165,7 @@ public class MyActivity extends ActionBarActivity implements SensorEventListener
                             if (mSensor != null) {
                                 volume = 100 * mSensor.getTheAmplitude() / 32768;
                             }
-                            if (!crying) {
-                                if (volume > 10) {
-                                    counter++;
-                                } else if (counter > 0) {
-                                    counter--;
-                                }
-                                if (counter == 10) {
-                                    crying = true;
-                                    counter = 0;
-                                    wakeDevice();
-                                    fullWakeLock.release();
-                                    SendRequest.send("/topics/" + topic, getString(R.string.cryingMessage), getApplicationContext());
-                                }
-                            }
-
-                            if (crying) {
-                                if (volume < 10) {
-                                    counter++;
-                                } else if (counter > 0) {
-                                    counter--;
-                                }
-                                if (counter == 10) {
-                                    crying = false;
-                                    counter = 0;
-                                    SendRequest.send("/topics/" + topic, getString(R.string.stopCrying), getApplicationContext());;
-                                }
-                            }
-
+                            checkIfCrying(volume);
                             int volumeToSend = (int) volume;
                             updateTextView(R.id.volumeLevel, "Volume: " + String.valueOf(volumeToSend));
 
@@ -224,6 +181,38 @@ public class MyActivity extends ActionBarActivity implements SensorEventListener
         }
     }
 
+    private void checkIfCrying(double volume) {
+        if (!crying) {
+            if (volume > 10) {
+                counter++;
+            } else if (counter > 0) {
+                counter--;
+            }
+            if (counter == 10) {
+                crying = true;
+                counter = 0;
+                wakeDevice();
+                fullWakeLock.release();
+                SendRequest.send("/topics/" + topic, getString(R.string.cryingMessage), getApplicationContext());
+                updateState();
+            }
+        }
+
+        if (crying) {
+            if (volume < 10) {
+                counter++;
+            } else if (counter > 0) {
+                counter--;
+            }
+            if (counter == 10) {
+                crying = false;
+                counter = 0;
+                SendRequest.send("/topics/" + topic, getString(R.string.stopCrying), getApplicationContext());
+                updateState();
+            }
+        }
+    }
+
     private void startAccelerometer() {
         if (sensorManager == null) {
             sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
@@ -233,7 +222,8 @@ public class MyActivity extends ActionBarActivity implements SensorEventListener
                 accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
                 sensorManager.registerListener(this, accelerometer, SensorManager.SENSOR_DELAY_NORMAL);
             } else {
-                // fai! we dont have an accelerometer!
+                Log.e(TAG, "Failed to collect data from accelerometer");
+                // fail! we dont have an accelerometer!
             }
         }
     }
@@ -254,7 +244,7 @@ public class MyActivity extends ActionBarActivity implements SensorEventListener
     }
 
     public void initializeViews() {
-        currentZ = (TextView) findViewById(R.id.currentZ);
+        movesCount = (TextView) findViewById(R.id.currentZ);
     }
 
     //onResume() register the accelerometer for listening the events
@@ -297,21 +287,23 @@ public class MyActivity extends ActionBarActivity implements SensorEventListener
 
             // gForce will be close to 1 when there is no movement
             float gForce = (float) Math.sqrt(gX * gX + gY * gY + gZ * gZ);
-            currentZ.setText(Float.toString(gForce));
+            movesCount.setText(Float.toString(gForce));
             // Alert if gForce exceeds threshold;
             if(gForce > SHAKE_THRESHOLD) {
                 movingCounter++;
-                if(movingCounter >= 5 && moving == false)
+                if(movingCounter >= 5 && !moving)
                 {
                     moving = true;
                     SendRequest.send("/topics/" + topic, getString(R.string.movingMessage), getApplicationContext());
+                    updateState();
                 }
             }
-            else if (movingTime == 0 && moving == true){
+            else if (movingTime == 0 && moving){
                 moving = false;
                 movingCounter = 0 ;
                 movingTime = 10000;
                 SendRequest.send("/topics/" + topic, getString(R.string.stopMoving), getApplicationContext());
+                updateState();
             }
         }
     }
@@ -322,11 +314,6 @@ public class MyActivity extends ActionBarActivity implements SensorEventListener
         displayCleanValues();
         // display the current x,y,z accelerometer values
         displayCurrentValues();
-
-        deltaX = event.values[0];
-        deltaY = event.values[1];
-        deltaZ = event.values[2];
-
 
         if (event.accuracy == SensorManager.SENSOR_STATUS_UNRELIABLE)
         {
@@ -340,22 +327,33 @@ public class MyActivity extends ActionBarActivity implements SensorEventListener
     }
 
     public void displayCleanValues() {
-            currentZ.setText("0.0");
+        movesCount.setText("0.0");
     }
 
     // display the current x,y,z accelerometer values
     public void displayCurrentValues() {
-        currentZ.setText(Float.toString(movingCounter));
+        movesCount.setText(Float.toString(movingCounter));
     }
 
     /*Sound part*/
     public void updateTextView(int text_id, String toThis) {
-
         TextView val = (TextView) findViewById(text_id);
         val.setText(toThis);
-
-        return;
     }
+
+    private void updateState(){
+        TextView val = (TextView) findViewById(R.id.babyState);
+        if(moving || crying)
+            val.setText(getString(R.string.babyState) + " " + getString(R.string.notSleeping));
+        else
+            val.setText(getString(R.string.babyState) + " " + getString(R.string.sleeping));
+    }
+
+    private void cleanState() {
+        TextView val = (TextView) findViewById(R.id.babyState);
+        val.setText(getString(R.string.babyState));
+    }
+
     protected void createWakeLocks(){
         PowerManager powerManager = (PowerManager) getSystemService(Context.POWER_SERVICE);
         fullWakeLock = powerManager.newWakeLock((PowerManager.SCREEN_BRIGHT_WAKE_LOCK | PowerManager.FULL_WAKE_LOCK | PowerManager.ACQUIRE_CAUSES_WAKEUP), "Loneworker - FULL WAKE LOCK");

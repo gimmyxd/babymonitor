@@ -6,31 +6,56 @@
 
     <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:background="#ffffff"
+            android:layout_height="170dp"
+            android:background="#B83B5E"
             android:gravity="center|top"
             android:orientation="horizontal"
-            android:layout_alignParentBottom="true"
-            android:layout_alignParentLeft="true"
-            android:layout_alignParentStart="true"
-            android:layout_marginBottom="239dp">
+            android:layout_below="@+id/linearLayout" android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true" android:id="@+id/linearLayout2">
 
-        <LinearLayout
-                android:layout_width="400dp"
-                android:layout_height="148dp"
-                android:background="#ffffff"
+    </LinearLayout>
+
+    <TextView
+            android:id="@+id/volumeLevel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="235dp"
+            android:gravity="center"
+            android:layout_centerHorizontal="true"
+            android:text="@string/volume_level"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:textSize="35sp" android:textColor="#F08A5D"/>
+
+    <TextView
+            android:id="@+id/informationTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/registering_message"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:textSize="30sp"
+            android:layout_centerHorizontal="true"
+            android:layout_marginBottom="31dp"/>
+
+    <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="170dp"
+                android:background="#6A2C70"
                 android:gravity="center"
-                android:orientation="vertical" >
+                android:orientation="vertical"
+                android:layout_alignParentTop="true"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentStart="true"
+                android:id="@+id/linearLayout">
 
             <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
-                    android:layout_marginTop="50dp"
-                    android:text="Moves Count"
-                    android:textSize="35dp"
-
-                    android:textIsSelectable="false"/>
+                    android:layout_marginTop="20dp"
+                    android:text="@string/movesCount"
+                    android:textSize="35sp"
+                    android:textIsSelectable="false"
+                    android:textColor="#B83B5E"/>
 
             <TextView
                     android:id="@+id/currentZ"
@@ -39,43 +64,27 @@
                     android:layout_gravity="center"
                     android:layout_marginTop="10dp"
                     android:text="0.0"
-                    android:textSize="35dp" />
+                    android:textSize="35sp"
+                    android:textColor="#B83B5E"/>
         </LinearLayout>
-
+    <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:layout_below="@+id/linearLayout2"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
+            android:id="@+id/babyStateBg">
+        <TextView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:textSize="35sp"
+                android:text="@string/babyState"
+                android:id="@+id/babyState"
+                android:layout_gravity="center"
+                android:gravity="center_vertical|center_horizontal"
+                android:textColor="#F9ED69"
+                android:background="#F08A5D"/>
     </LinearLayout>
-
-    <TextView
-            android:id="@+id/volumeLevel"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="220dp"
-            android:gravity="center"
-            android:layout_centerHorizontal="true"
-            android:text="Volume Level: n/a"
-            android:textAppearance="?android:attr/textAppearanceMedium"
-            android:textSize="35dp"/>
-
-    <TextView
-            android:id="@+id/informationTextView"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/registering_message"
-            android:textAppearance="?android:attr/textAppearanceMedium"
-            android:textSize="30dp"
-            android:layout_above="@+id/sendButton"
-            android:layout_centerHorizontal="true"
-            android:layout_marginBottom="31dp"/>
-
-    <Button
-            android:id="@+id/sendButton"
-            android:layout_width="250dp"
-            android:layout_height="wrap_content"
-            android:gravity="center"
-            android:text="@string/buttonSendText"
-            android:layout_weight="0.53"
-            android:layout_alignParentBottom="true"
-            android:layout_centerHorizontal="true"
-            android:layout_marginBottom="74dp"
-            android:textSize="20dp"/>
 
 </RelativeLayout>
