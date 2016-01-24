@@ -88,15 +88,19 @@ public class RegistrationIntentService extends IntentService {
         GcmPubSub pubSub = GcmPubSub.getInstance(this);
         String topic ="";
         try {
-            BabyMonitorAppication baby = ((BabyMonitorAppication)getApplication());
-            topic = baby.getTopic();
+            //BabyMonitorAppication baby = ((BabyMonitorAppication)getApplication());
+            //topic = baby.getTopic();
+
+            topic = ChildActivity.getToken();
 
         } catch (Exception e) {
             Log.e(TAG, "Failed to connect to twitter service", e);
 
         }
         if (!TextUtils.isEmpty(topic))
-        pubSub.subscribe(token, "/topics/"+topic, null);
+            Log.e(TAG, topic);
+
+            pubSub.subscribe(token, "/topics/"+topic, null);
     }
     // [END subscribe_topics]
 

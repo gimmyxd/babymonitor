@@ -31,7 +31,7 @@ public class BabyMonitorAppication extends Application implements
     }
     @Override
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
-            Log.i("Topic",sharedPreferences.getString("topic",null));
+            //Log.i("Topic",sharedPreferences.getString("topic",null));
 
     }
 

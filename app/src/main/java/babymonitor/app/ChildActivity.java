@@ -17,6 +17,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
+import android.widget.Button;
 import android.widget.TextView;
 import android.os.Handler;
 import android.os.PowerManager;
@@ -53,46 +54,48 @@ public class ChildActivity extends AppCompatActivity implements SensorEventListe
     private PowerManager.WakeLock partialWakeLock;
 
     private BroadcastReceiver mRegistrationBroadcastReceiver;
+    private static String token;
+    private TextView tokenTextView;
 
-    public boolean onCreateOptionsMenu(Menu menu) {
-        MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.activity_main, menu);
-        return true;
-    }
+//    public boolean onCreateOptionsMenu(Menu menu) {
+//        MenuInflater inflater = getMenuInflater();
+//        inflater.inflate(R.menu.activity_main, menu);
+//        return true;
+//    }
 
 
     // Called when an options item is clicked
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.itemRecordingStart:
-                //start recording
-                startSoundRecorder();
-                startAccelerometer();
-                recordingTextAnimation();
-                Toast.makeText(getBaseContext(), "Start Recording", Toast.LENGTH_SHORT).show();
-                break;
-            case R.id.itemRecordingStop:
-                //stop recording
-                stopSoundRecorder();
-                stopAccelerometer();
-                hideTextView();
-                Toast.makeText(getBaseContext(), "Stop Recording", Toast.LENGTH_SHORT).show();
-                break;
-            case R.id.itemSubscribingStart:
-                RegistrationIntentService.running ="yes";
-                Intent msgIntent = new Intent(this, RegistrationIntentService.class);
-                startService(msgIntent);
-                break;
-            case R.id.itemSendTestMessage:
-                sendTestMessage();
-                break;
-            case R.id.itemPrefs:
-                startActivity(new Intent(this, TopicActivity.class));
-                break;
-        }
-        return true;
-    }
+//    @Override
+//    public boolean onOptionsItemSelected(MenuItem item) {
+//        switch (item.getItemId()) {
+//            case R.id.itemRecordingStart:
+//                //start recording
+//                startSoundRecorder();
+//                startAccelerometer();
+//                recordingTextAnimation();
+//                Toast.makeText(getBaseContext(), "Start Recording", Toast.LENGTH_SHORT).show();
+//                break;
+//            case R.id.itemRecordingStop:
+//                //stop recording
+//                stopSoundRecorder();
+//                stopAccelerometer();
+//                hideTextView();
+//                Toast.makeText(getBaseContext(), "Stop Recording", Toast.LENGTH_SHORT).show();
+//                break;
+//            case R.id.itemSubscribingStart:
+//                RegistrationIntentService.running ="yes";
+//                Intent msgIntent = new Intent(this, RegistrationIntentService.class);
+//                startService(msgIntent);
+//                break;
+//            case R.id.itemSendTestMessage:
+//                sendTestMessage();
+//                break;
+//            case R.id.itemPrefs:
+//                startActivity(new Intent(this, TopicActivity.class));
+//                break;
+//        }
+//        return true;
+//    }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -101,8 +104,34 @@ public class ChildActivity extends AppCompatActivity implements SensorEventListe
         initializeViews();
         createWakeLocks();
         hideTextView();
+        generateToken();
+        final Intent msgIntent = new Intent(this, RegistrationIntentService.class);
+
+
+        final Button record_button = (Button) findViewById(R.id.record_button);
+        final Button stop_button = (Button) findViewById(R.id.stop_button);
+
+        record_button.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                startSoundRecorder();
+                startAccelerometer();
+                recordingTextAnimation();
+                RegistrationIntentService.running ="yes";
+                startService(msgIntent);
+            }
+        });
+
+        stop_button.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                hideTextView();
+                stopSoundRecorder();
+                stopAccelerometer();
+            }
+        });
+
 
         mInformationTextView = (TextView) findViewById(R.id.informationTextView);
+        tokenTextView = (TextView) findViewById(R.id.token_field );
 
         mRegistrationBroadcastReceiver = new BroadcastReceiver() {
             @Override
@@ -126,16 +155,24 @@ public class ChildActivity extends AppCompatActivity implements SensorEventListe
         }
     }
 
+    private void generateToken() {
+        SessionIdentifierGenerator SIG = new SessionIdentifierGenerator(4);
+        if(token == null)
+            token  = SIG.nextSessionId();
+        updateTextView(R.id.token_field, "Topic: " + token);
+
+    }
+
     private void sendTestMessage() {
         try {
-            BabyMonitorAppication baby = ((BabyMonitorAppication)getApplication());
-            topic = baby.getTopic();
+            topic = token;
 
         } catch (Exception e) {
             Log.e(TAG, "Failed to connect", e);
 
         }
         if (!TextUtils.isEmpty(topic))
+            Log.e(TAG, topic);
             SendRequest.send("/topics/" + topic, getString(R.string.testMessage), getApplicationContext());
     }
 
@@ -198,6 +235,7 @@ public class ChildActivity extends AppCompatActivity implements SensorEventListe
                 counter = 0;
                 wakeDevice();
                 fullWakeLock.release();
+                Log.e(TAG, topic);
                 SendRequest.send("/topics/" + topic, getString(R.string.cryingMessage), getApplicationContext());
             }
         }
@@ -211,6 +249,7 @@ public class ChildActivity extends AppCompatActivity implements SensorEventListe
             if (counter == 10) {
                 crying = false;
                 counter = 0;
+                Log.e(TAG, topic);
                 SendRequest.send("/topics/" + topic, getString(R.string.stopCrying), getApplicationContext());
             }
         }
@@ -298,6 +337,7 @@ public class ChildActivity extends AppCompatActivity implements SensorEventListe
                 if(movingCounter >= 5 && !moving)
                 {
                     moving = true;
+                    Log.e(TAG, topic);
                     SendRequest.send("/topics/" + topic, getString(R.string.movingMessage), getApplicationContext());
                 }
             }
@@ -330,16 +370,19 @@ public class ChildActivity extends AppCompatActivity implements SensorEventListe
 
     public void hideTextView() {
         TextView rec_text = (TextView) findViewById(R.id.textView );
-        rec_text.setVisibility(View.GONE);
+        rec_text.setVisibility(View.INVISIBLE);
+        updateTextView(R.id.textView, "");
+
     }
 
     public void recordingTextAnimation(){
         TextView rec_text = (TextView) findViewById(R.id.textView );
+        updateTextView(R.id.textView, "Recording data...");
         rec_text.setVisibility(View.VISIBLE);
 
         Animation anim = new AlphaAnimation(0.0f, 1.0f);
-        anim.setDuration(300); //You can manage the time of the blink with this parameter
-        anim.setStartOffset(80);
+        anim.setDuration(100); //You can manage the time of the blink with this parameter
+        anim.setStartOffset(100);
         anim.setRepeatMode(Animation.REVERSE);
         anim.setRepeatCount(Animation.INFINITE);
         rec_text.startAnimation(anim);
@@ -386,6 +429,10 @@ public class ChildActivity extends AppCompatActivity implements SensorEventListe
             return false;
         }
         return true;
+    }
+
+    public static String getToken() {
+        return token;
     }
 }
 

@@ -48,5 +48,26 @@
                   android:visibility="gone"
                   android:textSize="35sp" android:textColor="#E84545"
                   android:layout_centerVertical="true" android:layout_centerHorizontal="true"/>
+        <Button android:layout_width="140dp" android:layout_height="50dp" android:text="@string/record_button"
+                android:id="@+id/record_button"
+                android:layout_marginTop="66dp" android:textSize="20sp"
+                android:background="#E84545" android:textColor="#53354A"
+                android:layout_marginLeft="30dp"
+                android:layout_below="@+id/volume" android:layout_toRightOf="@+id/moves"
+                android:layout_toEndOf="@+id/moves"/>
+        <Button android:layout_width="140dp" android:layout_height="50dp" android:text="@string/stop_button"
+                android:id="@+id/stop_button" android:textSize="20sp"
+                android:layout_marginRight="30dp"
+                android:background="#E84545" android:textColor="#53354A"
+                android:layout_alignTop="@+id/record_button" android:layout_alignParentRight="true"
+                android:layout_alignParentEnd="true"/>
+        <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:attr/textAppearanceLarge"
+                android:text="Token:"
+                android:id="@+id/token_field"
+                android:layout_below="@+id/record_button" android:layout_centerHorizontal="true"
+                android:layout_marginTop="40dp"/>
     </RelativeLayout>
 </LinearLayout>

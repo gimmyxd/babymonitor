@@ -4,12 +4,12 @@
     <string name="action_settings">Settings</string>
     <string name="titleRecordingStop">Stop Recording</string>
     <string name="titleRecordingStart">Start Recording</string>
-    <string name="titleSubscribingStart">Subscribe to Service</string>
+    <string name="titleSubscribingStart">Start Service</string>
     <string name="gcm_send_message"></string>
     <string name="token_error_message">Token Error</string>
     <string name="registering_message"></string>
     <string name="buttonSendText">Send test message</string>
-    <string name="titlePrefs">Subscribe to Topic</string>
+    <string name="titlePrefs">Set Topic</string>
     <string name="titleTopic">Topic</string>
     <string name="summaryTopic">Topic for subscription</string>
     <string name="testMessage">This is a test message.</string>
@@ -25,4 +25,6 @@
     <string name="parent_button">Parent Mode</string>
     <string name="child_button">Child Mode</string>
     <string name="parent_setup">Setup</string>
+    <string name="record_button">RECORD</string>
+    <string name="stop_button">STOP</string>
 </resources>
