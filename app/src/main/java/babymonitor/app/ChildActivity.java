@@ -14,6 +14,9 @@ import android.text.TextUtils;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.View;
+import android.view.animation.AlphaAnimation;
+import android.view.animation.Animation;
 import android.widget.TextView;
 import android.os.Handler;
 import android.os.PowerManager;
@@ -22,7 +25,7 @@ import android.widget.Toast;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
 
-public class MyActivity extends AppCompatActivity implements SensorEventListener {
+public class ChildActivity extends AppCompatActivity implements SensorEventListener {
 
     private static final String TAG = "MyActivity";
     private static final float SHAKE_THRESHOLD = 1.04f;
@@ -66,12 +69,14 @@ public class MyActivity extends AppCompatActivity implements SensorEventListener
                 //start recording
                 startSoundRecorder();
                 startAccelerometer();
+                recordingTextAnimation();
                 Toast.makeText(getBaseContext(), "Start Recording", Toast.LENGTH_SHORT).show();
                 break;
             case R.id.itemRecordingStop:
                 //stop recording
                 stopSoundRecorder();
                 stopAccelerometer();
+                hideTextView();
                 Toast.makeText(getBaseContext(), "Stop Recording", Toast.LENGTH_SHORT).show();
                 break;
             case R.id.itemSubscribingStart:
@@ -92,10 +97,10 @@ public class MyActivity extends AppCompatActivity implements SensorEventListener
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.child_page);
         initializeViews();
         createWakeLocks();
-        cleanState();
+        hideTextView();
 
         mInformationTextView = (TextView) findViewById(R.id.informationTextView);
 
@@ -167,7 +172,7 @@ public class MyActivity extends AppCompatActivity implements SensorEventListener
                             }
                             checkIfCrying(volume);
                             int volumeToSend = (int) volume;
-                            updateTextView(R.id.volumeLevel, "Volume: " + String.valueOf(volumeToSend));
+                            updateTextView(R.id.volume, "Volume: " + String.valueOf(volumeToSend));
 
                             handler.postDelayed(this, 250); // amount of delay between every cycle of volume level detection + sending the data  out
                         }
@@ -188,13 +193,12 @@ public class MyActivity extends AppCompatActivity implements SensorEventListener
             } else if (counter > 0) {
                 counter--;
             }
-            if (counter == 10) {
+            if (counter == 20) {
                 crying = true;
                 counter = 0;
                 wakeDevice();
                 fullWakeLock.release();
                 SendRequest.send("/topics/" + topic, getString(R.string.cryingMessage), getApplicationContext());
-                updateState();
             }
         }
 
@@ -208,7 +212,6 @@ public class MyActivity extends AppCompatActivity implements SensorEventListener
                 crying = false;
                 counter = 0;
                 SendRequest.send("/topics/" + topic, getString(R.string.stopCrying), getApplicationContext());
-                updateState();
             }
         }
     }
@@ -230,7 +233,7 @@ public class MyActivity extends AppCompatActivity implements SensorEventListener
 
     private void stopAccelerometer() throws NullPointerException{
         if (sensorManager != null) {
-            displayCleanValues();
+            //displayCleanValues();
             sensorManager.unregisterListener(this);
             sensorManager = null;
         }
@@ -244,7 +247,7 @@ public class MyActivity extends AppCompatActivity implements SensorEventListener
     }
 
     public void initializeViews() {
-        movesCount = (TextView) findViewById(R.id.moves_count);
+        //movesCount = (TextView) findViewById(R.id.moves_count);
     }
 
     //onResume() register the accelerometer for listening the events
@@ -287,7 +290,8 @@ public class MyActivity extends AppCompatActivity implements SensorEventListener
 
             // gForce will be close to 1 when there is no movement
             float gForce = (float) Math.sqrt(gX * gX + gY * gY + gZ * gZ);
-            movesCount.setText(Float.toString(gForce));
+            int moves = Math.round(gForce);
+            //movesCount.setText(Integer.toString(moves));
             // Alert if gForce exceeds threshold;
             if(gForce > SHAKE_THRESHOLD) {
                 movingCounter++;
@@ -295,15 +299,13 @@ public class MyActivity extends AppCompatActivity implements SensorEventListener
                 {
                     moving = true;
                     SendRequest.send("/topics/" + topic, getString(R.string.movingMessage), getApplicationContext());
-                    updateState();
                 }
             }
             else if (movingTime == 0 && moving){
                 moving = false;
                 movingCounter = 0 ;
                 movingTime = 10000;
-                SendRequest.send("/topics/" + topic, getString(R.string.stopMoving), getApplicationContext());
-                updateState();
+                //SendRequest.send("/topics/" + topic, getString(R.string.stopMoving), getApplicationContext());
             }
         }
     }
@@ -311,9 +313,9 @@ public class MyActivity extends AppCompatActivity implements SensorEventListener
     @Override
     public void onSensorChanged(SensorEvent event) {
         // clean current values
-        displayCleanValues();
+        //displayCleanValues();
         // display the current x,y,z accelerometer values
-        displayCurrentValues();
+        //displayCurrentValues();
 
         if (event.accuracy == SensorManager.SENSOR_STATUS_UNRELIABLE)
         {
@@ -326,32 +328,28 @@ public class MyActivity extends AppCompatActivity implements SensorEventListener
         }
     }
 
-    public void displayCleanValues() {
-        movesCount.setText("0.0");
+    public void hideTextView() {
+        TextView rec_text = (TextView) findViewById(R.id.textView );
+        rec_text.setVisibility(View.GONE);
     }
 
-    // display the current x,y,z accelerometer values
-    public void displayCurrentValues() {
-        movesCount.setText(Float.toString(movingCounter));
+    public void recordingTextAnimation(){
+        TextView rec_text = (TextView) findViewById(R.id.textView );
+        rec_text.setVisibility(View.VISIBLE);
+
+        Animation anim = new AlphaAnimation(0.0f, 1.0f);
+        anim.setDuration(300); //You can manage the time of the blink with this parameter
+        anim.setStartOffset(80);
+        anim.setRepeatMode(Animation.REVERSE);
+        anim.setRepeatCount(Animation.INFINITE);
+        rec_text.startAnimation(anim);
     }
+
 
     /*Sound part*/
     public void updateTextView(int text_id, String toThis) {
         TextView val = (TextView) findViewById(text_id);
         val.setText(toThis);
-    }
-
-    private void updateState(){
-        TextView val = (TextView) findViewById(R.id.babyState);
-        if(moving || crying)
-            val.setText(getString(R.string.babyState) + " " + getString(R.string.notSleeping));
-        else
-            val.setText(getString(R.string.babyState) + " " + getString(R.string.sleeping));
-    }
-
-    private void cleanState() {
-        TextView val = (TextView) findViewById(R.id.babyState);
-        val.setText(getString(R.string.babyState));
     }
 
     protected void createWakeLocks(){

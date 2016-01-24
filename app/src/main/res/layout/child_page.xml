@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:orientation="vertical"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent" android:weightSum="1">
+    <TextView
+            android:id="@+id/informationTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/registering_message"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:textSize="30sp"
+            android:visibility="gone"
+            android:layout_centerHorizontal="true"
+            android:layout_marginBottom="31dp"/>
+
+    <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="139dp" android:layout_gravity="center_horizontal"
+            android:background="#2B2E4A">
+        <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:text="Recording data..."
+                android:id="@+id/textView"
+                android:textSize="30dp" android:layout_alignParentTop="true" android:layout_centerHorizontal="true"
+                android:layout_marginTop="42dp" android:textColor="#E84545"/>
+    </RelativeLayout>
+    <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="298dp" android:layout_gravity="center_horizontal"
+            android:background="#2B2E4A" android:layout_weight="1.64">
+        <TextView android:id="@+id/volume" android:layout_width="wrap_content" android:layout_height="wrap_content"
+                  android:gravity="center"
+                  android:text="@string/volume_level" android:textAppearance="?android:attr/textAppearanceMedium"
+                  android:textSize="35sp" android:textColor="#E84545"
+                  android:layout_below="@+id/moves" android:layout_centerHorizontal="true"
+                  android:layout_marginTop="120dp"/>
+        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                  android:layout_gravity="center" android:text="@string/movesCount"
+                  android:textSize="35sp" android:textIsSelectable="false" android:textColor="#E84545"
+                  android:id="@+id/moves"
+                  android:visibility="gone"
+                  android:layout_above="@+id/moves_count" android:layout_centerHorizontal="true"/>
+        <TextView android:id="@+id/moves_count" android:layout_width="wrap_content" android:layout_height="wrap_content"
+                  android:text="0.0"
+                  android:visibility="gone"
+                  android:textSize="35sp" android:textColor="#E84545"
+                  android:layout_centerVertical="true" android:layout_centerHorizontal="true"/>
+    </RelativeLayout>
+</LinearLayout>

@@ -58,7 +58,7 @@
                     android:textColor="#B83B5E"/>
 
             <TextView
-                    android:id="@+id/currentZ"
+                    android:id="@+id/moves_count"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"

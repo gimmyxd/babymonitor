@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:orientation="vertical"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent">
+    <TextView
+            android:id="@+id/informationTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/registering_message"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:textSize="30sp"
+            android:visibility="gone"
+            android:layout_centerHorizontal="true"
+            android:layout_marginBottom="31dp"/>
+
+    <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" android:layout_gravity="center_horizontal"
+            android:background="#2B2E4A">
+        <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:attr/textAppearanceLarge"
+                android:text="Your baby is being monitorized."
+                android:id="@+id/textView2"
+                android:gravity="center"
+                android:textSize="30sp"
+                android:textColor="#E84545"
+                android:layout_marginBottom="105dp" android:layout_above="@+id/textView3"
+                android:layout_alignParentLeft="true" android:layout_alignParentStart="true"/>
+        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                  android:textAppearance="?android:attr/textAppearanceLarge"
+                  android:text="Set the topic to start receving updates" android:id="@+id/textView3" android:gravity="center"
+                  android:textSize="30sp"
+                  android:textColor="#E84545"
+                  android:layout_alignParentBottom="true" android:layout_alignParentLeft="true"
+                  android:layout_alignParentStart="true" android:layout_marginBottom="121dp"/>
+    </RelativeLayout>
+</LinearLayout>

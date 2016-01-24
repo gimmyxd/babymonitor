@@ -13,8 +13,8 @@
     <string name="titleTopic">Topic</string>
     <string name="summaryTopic">Topic for subscription</string>
     <string name="testMessage">This is a test message.</string>
-    <string name="cryingMessage">Your baby is crying.Sing a lullany for him!</string>
-    <string name="movingMessage">Your baby is mooving.Go take care of him!</string>
+    <string name="cryingMessage">Your baby is crying.Sing a lullaby for him!</string>
+    <string name="movingMessage">Your baby is moving.Go take care of him!</string>
     <string name="stopMoving">Your baby is chillin.</string>
     <string name="stopCrying">Your baby is quiet and peaceful.</string>
     <string name="volume_level">Volume Level: n/a</string>
@@ -22,4 +22,7 @@
     <string name="movesCount">Moves Count:</string>
     <string name="notSleeping">awake</string>
     <string name="sleeping">sleeping</string>
+    <string name="parent_button">Parent Mode</string>
+    <string name="child_button">Child Mode</string>
+    <string name="parent_setup">Setup</string>
 </resources>

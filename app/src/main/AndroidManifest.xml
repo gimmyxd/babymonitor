@@ -4,7 +4,6 @@
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="com.google.android.c2dm.permission.RECEIVE" />
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.DISABLE_KEYGUARD" />
 
@@ -15,7 +14,7 @@
         android:theme="@style/AppTheme"
         android:name=".BabyMonitorAppication">
         <activity
-            android:name=".MyActivity"
+            android:name=".MainPageActivity"
             android:label="@string/app_name" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -24,6 +23,9 @@
             </intent-filter>
         </activity>
         <activity android:name=".TopicActivity" android:label="@string/titlePrefs" />
+        <activity android:name=".MyActivity" />
+        <activity android:name=".ParentActivity" />
+        <activity android:name=".ChildActivity" />
         <receiver
                 android:name="com.google.android.gms.gcm.GcmReceiver"
                 android:exported="true"
